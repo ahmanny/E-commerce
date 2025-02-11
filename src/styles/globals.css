@@ -1,0 +1,29 @@
+@import "@fontsource/inter/index.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "Inter", sans-serif;
+}
+
+@layer utilities {
+  .hide-scrollbar {
+    overflow: auto;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hide-scrollbar {
+    scrollbar-width: none;
+  }
+}
+
+.btn {
+  @apply bg-black text-white bg-opacity-80 w-full h-[45px] rounded-md hover:bg-opacity-100 transition;
+}
+.input {
+  @apply border-neutral-300 border border-solid p-2 w-full rounded-[5px] outline-none focus:border-blue-500;
+}
