@@ -1,21 +1,18 @@
 import type { Metadata } from "next";
-import Header from "@/components/app/Header";
-import Footer from "@/components/app/Footer";
+
 export const metadata: Metadata = {
   title: "E-commerce App",
   description: "Built with Next.js and React Query",
 };
 
-export default function MainLayout({
+export default function AdminLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <div className="w-screen">
-      <Header />
-      <div className=" min-h-screen">{children}</div>
-      <Footer />
+    <div>
+      <div className="container">{children}</div>
     </div>
   );
 }
