@@ -10,7 +10,6 @@ const products = [
     price: 75,
     stock: "In Stock",
     categories: "T-shirt, Men",
-    image: "/shirt1.png",
   },
   {
     id: 2,
@@ -19,7 +18,6 @@ const products = [
     price: 35,
     stock: "In Stock",
     categories: "T-shirt, Men",
-    image: "/shirt2.png",
   },
   {
     id: 3,
@@ -28,7 +26,6 @@ const products = [
     price: 27,
     stock: "In Stock",
     categories: "T-shirt",
-    image: "/shirt3.png",
   },
   {
     id: 4,
@@ -37,7 +34,6 @@ const products = [
     price: 22,
     stock: "In Stock",
     categories: "T-shirt, Raw",
-    image: "/shirt4.png",
   },
 ];
 export default function ProductsComponent() {

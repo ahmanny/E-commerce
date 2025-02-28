@@ -1,8 +1,13 @@
-async function fetchData() {
-  return new Promise((resolve) => setTimeout(resolve, 3000)); // Simulate 3s delay
-}
+import SettingsComponent from "@/components/adminComponents/settings/SettingsComponent";
 
 export default async function SettingsPage() {
-  await fetchData();
-  return <div>SettingsPage</div>;
+  return (
+    <div className="bg-white p-8 w-[85%] pb-16 rounded-md">
+      {/* page heading */}
+      <div className=" pb-8 border-b-[1px] border-solid border-gray-200 mb-12">
+        <h1 className=" text-xl font-semibold ">Settings</h1>
+      </div>
+      <SettingsComponent />
+    </div>
+  );
 }

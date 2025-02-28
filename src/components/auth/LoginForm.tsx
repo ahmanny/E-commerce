@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import GoogleSignin from "./GoogleSignin";
 import Link from "next/link";
+import { useLogin } from "@/lib/utils/hooks/useLogin";
 
 const schema = z.object({
   email: z.string().email("invalid Email"),
@@ -16,8 +17,10 @@ export default function LoginForm() {
     handleSubmit,
     formState: { errors },
   } = useForm({ resolver: zodResolver(schema) });
+  const loginMutation = useLogin();
   // function to handle submit form click.
   function submitForm(data: any) {
+    loginMutation.mutate(data);
     console.log(data);
   }
   return (

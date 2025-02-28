@@ -10,13 +10,7 @@ export interface Order {
     status: string;
 }
 
-export interface Customer {
-    id: number;
-    name: string;
-    email: string;
-    shippingAddress: string;
-    image?: string;
-}
+
 
 export interface Review {
     id: number;

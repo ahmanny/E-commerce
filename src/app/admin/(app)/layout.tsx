@@ -19,7 +19,7 @@ export default function AdminAppLayout({
       </div>
       <div className="container   min-h-screen flex-1 pt-5">
         <div className=" h-[75px]  flex justify-between items-center pr-8">
-          <PageTitle title={title} />
+          <PageTitle />
           <button>
             <TbLogout className="text-2xl" />
           </button>

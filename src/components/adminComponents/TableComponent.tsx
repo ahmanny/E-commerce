@@ -5,11 +5,11 @@ import { BiSortAlt2 } from "react-icons/bi";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import SearchBar from "../SearchBar";
 import { useEffect, useState } from "react";
-import { Customer, Order, Review } from "@/lib/types/admin.types";
+import { Order, Review } from "@/lib/types/admin.types";
 import Pagination from "../ui/pagination";
 import { Product } from "@/lib/types/productsTypes";
-
 import { useRouter } from "next/navigation";
+import { Customer } from "@/lib/types/cutomersTypes";
 
 interface TableProps {
   tableHeaders: string[];
@@ -128,7 +128,7 @@ export default function TableComponent({
             </Table.Row>
           </Table.Header>
 
-          <Table.Body>
+          <Table.Body className=" capitalize">
             {paginatedData.length === 0 ? (
               <Table.Row>
                 <Table.Cell
@@ -145,7 +145,11 @@ export default function TableComponent({
                     <>
                       <Table.Cell></Table.Cell>
                       <Table.Cell>
-                        <Avatar.Root shape="rounded" size="lg">
+                        <Avatar.Root
+                          shape="rounded"
+                          size="lg"
+                          colorPalette={"blue"}
+                        >
                           <Avatar.Fallback name={item.name} />
                           <Avatar.Image src={item.image} />
                         </Avatar.Root>
@@ -166,7 +170,11 @@ export default function TableComponent({
                     <>
                       <Table.Cell></Table.Cell>
                       <Table.Cell>
-                        <Avatar.Root shape="rounded" size="lg">
+                        <Avatar.Root
+                          shape="rounded"
+                          size="lg"
+                          colorPalette={"blue"}
+                        >
                           <Avatar.Fallback name={item.order} />
                           <Avatar.Image src={item.image} />
                         </Avatar.Root>
@@ -186,7 +194,11 @@ export default function TableComponent({
                     <>
                       <Table.Cell></Table.Cell>
                       <Table.Cell>
-                        <Avatar.Root shape="rounded" size="lg">
+                        <Avatar.Root
+                          shape="rounded"
+                          size="lg"
+                          colorPalette={"blue"}
+                        >
                           <Avatar.Fallback name={item.name} />
                           <Avatar.Image src={item.image} />
                         </Avatar.Root>
@@ -205,7 +217,11 @@ export default function TableComponent({
                     <>
                       <Table.Cell></Table.Cell>
                       <Table.Cell>
-                        <Avatar.Root shape="rounded" size="lg">
+                        <Avatar.Root
+                          shape="rounded"
+                          size="lg"
+                          colorPalette={"blue"}
+                        >
                           <Avatar.Fallback name={item.name} />
                           <Avatar.Image src={item.image} />
                         </Avatar.Root>
