@@ -4,19 +4,19 @@ import { Provider } from "@/components/ui/provider";
 import QueryProvider from "@/lib/providers/QueryProvider";
 
 export const metadata: Metadata = {
-  title: "E-commerce Admin App",
-  description: "Built with Next.js and React Query",
+  title: "E-commerce",
+  description: "",
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
+      <body>
         <Provider>
           <QueryProvider>
-            <main className="container min-h-screen">{children}</main>
+            <main>{children}</main>
           </QueryProvider>
         </Provider>
       </body>

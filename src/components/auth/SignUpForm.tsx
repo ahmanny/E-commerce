@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import GoogleSignin from "./GoogleSignin";
 import Link from "next/link";
+import { useSignup } from "@/lib/utils/hooks/mutations/useAuth";
+import { BeatLoader } from "react-spinners";
 
 const schema = z.object({
   name: z.string().min(3, "name must be at least 3 characters"),
@@ -17,9 +19,11 @@ export default function SignUpForm() {
     handleSubmit,
     formState: { errors },
   } = useForm({ resolver: zodResolver(schema) });
+
+  const signupMutation = useSignup();
   // function to handle submit form click.
   function submitForm(data: any) {
-    console.log(data);
+    signupMutation.mutate(data);
   }
   return (
     <div className="flex flex-col justify-center items-center py-24 gap-[30px]">
@@ -74,12 +78,25 @@ export default function SignUpForm() {
             policy.
           </p>
         </div>
-        <button
-          type="submit"
-          className=" bg-black text-white w-[350px] h-[43px] rounded-md"
-        >
-          Create Account
-        </button>
+
+        <div>
+          <button
+            type="submit"
+            className=" bg-black text-white w-[350px] h-[43px] rounded-md"
+          >
+            {signupMutation.isPending ? (
+              <BeatLoader color="#3498db" />
+            ) : (
+              "Create Account"
+            )}
+          </button>
+          {/* backend errors */}
+          {signupMutation.isError && (
+            <p className=" text-red-500">
+              {String(signupMutation.error?.message)}
+            </p>
+          )}
+        </div>
       </form>
       <div>
         <p>

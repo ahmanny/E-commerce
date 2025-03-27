@@ -1,10 +1,5 @@
-import type { Metadata } from "next";
 import Header from "@/components/app/Header";
 import Footer from "@/components/app/Footer";
-export const metadata: Metadata = {
-  title: "E-commerce App",
-  description: "Built with Next.js and React Query",
-};
 
 export default function MainLayout({
   children,
@@ -14,7 +9,7 @@ export default function MainLayout({
   return (
     <div className="w-screen">
       <Header />
-      <div className=" min-h-screen">{children}</div>
+      <div className="mx-auto mt-1">{children}</div>
       <Footer />
     </div>
   );

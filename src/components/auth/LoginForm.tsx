@@ -5,7 +5,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import GoogleSignin from "./GoogleSignin";
 import Link from "next/link";
-import { useLogin } from "@/lib/utils/hooks/useLogin";
+import { useLogin } from "@/lib/utils/hooks/mutations/useAuth";
+import { Spinner } from "@chakra-ui/react";
+import { BeatLoader } from "react-spinners";
 
 const schema = z.object({
   email: z.string().email("invalid Email"),
@@ -21,7 +23,6 @@ export default function LoginForm() {
   // function to handle submit form click.
   function submitForm(data: any) {
     loginMutation.mutate(data);
-    console.log(data);
   }
   return (
     <div className="flex flex-col justify-center items-center py-24 gap-[30px]">
@@ -32,6 +33,7 @@ export default function LoginForm() {
         onSubmit={handleSubmit(submitForm)}
         className=" flex flex-col gap-[15px] w-[350px]"
       >
+        {/* email input  */}
         <div className=" flex-col flex ">
           <label htmlFor="email">Email</label>
           <input {...register("email")} id="email" className=" input" />
@@ -39,6 +41,7 @@ export default function LoginForm() {
             <p className="text-red-500">{String(errors.email.message)}</p>
           )}
         </div>
+        {/* password input */}
         <div className=" flex-col flex ">
           <label htmlFor="password">Password</label>
           <input {...register("password")} id="password" className=" input" />
@@ -46,6 +49,7 @@ export default function LoginForm() {
             <p className="text-red-500">{String(errors.password.message)}</p>
           )}
         </div>
+        {/* forgotten password button */}
         <div className=" w-full flex justify-end">
           <Link
             href={`/forgotten-password`}
@@ -54,9 +58,16 @@ export default function LoginForm() {
             Forgotten Password?
           </Link>
         </div>
+        {/* submit form button */}
         <button type="submit" className="btn">
-          Login
+          {loginMutation.isPending ? <BeatLoader color="#3498db" /> : "Login"}
         </button>
+        {/* backend errors */}
+        {loginMutation.isError && (
+          <p className=" text-red-500">
+            {String(loginMutation.error?.message)}
+          </p>
+        )}
       </form>
       <div>
         <p>

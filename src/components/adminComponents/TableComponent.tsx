@@ -1,25 +1,33 @@
 "use client";
 
-import { Avatar, HStack, Image, Stack, Table } from "@chakra-ui/react";
+import {
+  Avatar,
+  HStack,
+  Image,
+  Menu,
+  Portal,
+  Stack,
+  Table,
+} from "@chakra-ui/react";
 import { BiSortAlt2 } from "react-icons/bi";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import SearchBar from "../SearchBar";
 import { useEffect, useState } from "react";
 import { Order, Review } from "@/lib/types/admin.types";
 import Pagination from "../ui/pagination";
-import { Product } from "@/lib/types/productsTypes";
+import { Product, productsinterface } from "@/lib/types/productsTypes";
 import { useRouter } from "next/navigation";
 import { Customer } from "@/lib/types/cutomersTypes";
 
 interface TableProps {
   tableHeaders: string[];
   componentFor?: "products" | "orders" | "customers" | "reviews";
-  data?: Product[] | Order[] | Customer[] | Review[];
+  data?: productsinterface[] | Order[] | Customer[] | Review[];
   addBtnText?: string;
 }
 
-const isProduct = (item: any): item is Product =>
-  "sku" in item && "stock" in item;
+const isProduct = (item: any): item is productsinterface =>
+  "sku" in item && "stock_status" in item;
 const isOrder = (item: any): item is Order => "order" in item && "date" in item;
 const isReview = (item: any): item is Review =>
   "review" in item && "name" in item;
@@ -74,9 +82,9 @@ export default function TableComponent({
             )}
             {/* search within product table */}
             {componentFor === "products" && (
-              <SearchBar<Product>
-                items={data as Product[]} // Use `data` instead of `filteredItems`
-                searchKey="name"
+              <SearchBar<productsinterface>
+                items={data as productsinterface[]} // Use `data` instead of `filteredItems`
+                searchKey="title"
                 onSearch={setFilteredItems}
               />
             )}
@@ -139,8 +147,8 @@ export default function TableComponent({
                 </Table.Cell>
               </Table.Row>
             ) : (
-              paginatedData.map((item) => (
-                <Table.Row key={item.id}>
+              paginatedData.map((item, index) => (
+                <Table.Row key={index}>
                   {componentFor === "products" && isProduct(item) && (
                     <>
                       <Table.Cell></Table.Cell>
@@ -150,19 +158,46 @@ export default function TableComponent({
                           size="lg"
                           colorPalette={"blue"}
                         >
-                          <Avatar.Fallback name={item.name} />
-                          <Avatar.Image src={item.image} />
+                          <Avatar.Fallback name={item.title} />
+                          <Avatar.Image src={item.images[0]} />
                         </Avatar.Root>
                       </Table.Cell>
-                      <Table.Cell>{item.name}</Table.Cell>
+                      <Table.Cell>{item.title}</Table.Cell>
                       <Table.Cell>{item.sku}</Table.Cell>
                       <Table.Cell>{item.price}</Table.Cell>
-                      <Table.Cell>{item.stock}</Table.Cell>
-                      <Table.Cell>{item.categories}</Table.Cell>
+                      <Table.Cell>{item.stock_status}</Table.Cell>
+                      <Table.Cell>{item.category}</Table.Cell>
                       <Table.Cell>
-                        <button>
-                          <HiOutlineDotsHorizontal />
-                        </button>
+                        <Menu.Root>
+                          <Menu.Trigger asChild>
+                            <button>
+                              <HiOutlineDotsHorizontal />
+                            </button>
+                          </Menu.Trigger>
+                          <Portal>
+                            <Menu.Positioner>
+                              <Menu.Content>
+                                <Menu.Item
+                                  value="edit"
+                                  onClick={() =>
+                                    router.push(
+                                      `/admin/products/update?productId=${item._id}`
+                                    )
+                                  }
+                                >
+                                  Edit
+                                </Menu.Item>
+                                <Menu.Item
+                                  value="delete"
+                                  color="fg.error"
+                                  _hover={{ bg: "bg.error", color: "fg.error" }}
+                                >
+                                  Delete...
+                                </Menu.Item>
+                              </Menu.Content>
+                            </Menu.Positioner>
+                          </Portal>
+                        </Menu.Root>
                       </Table.Cell>
                     </>
                   )}
@@ -184,9 +219,27 @@ export default function TableComponent({
                       <Table.Cell>{item.total}</Table.Cell>
                       <Table.Cell>{item.status}</Table.Cell>
                       <Table.Cell>
-                        <button>
-                          <HiOutlineDotsHorizontal />
-                        </button>
+                        <Menu.Root>
+                          <Menu.Trigger asChild>
+                            <button>
+                              <HiOutlineDotsHorizontal />
+                            </button>
+                          </Menu.Trigger>
+                          <Portal>
+                            <Menu.Positioner>
+                              <Menu.Content>
+                                <Menu.Item value="edit">Edit</Menu.Item>
+                                <Menu.Item
+                                  value="delete"
+                                  color="fg.error"
+                                  _hover={{ bg: "bg.error", color: "fg.error" }}
+                                >
+                                  Delete...
+                                </Menu.Item>
+                              </Menu.Content>
+                            </Menu.Positioner>
+                          </Portal>
+                        </Menu.Root>
                       </Table.Cell>
                     </>
                   )}
@@ -207,9 +260,27 @@ export default function TableComponent({
                       <Table.Cell>{item.email}</Table.Cell>
                       <Table.Cell>{item.shippingAddress}</Table.Cell>
                       <Table.Cell>
-                        <button>
-                          <HiOutlineDotsHorizontal />
-                        </button>
+                        <Menu.Root>
+                          <Menu.Trigger asChild>
+                            <button>
+                              <HiOutlineDotsHorizontal />
+                            </button>
+                          </Menu.Trigger>
+                          <Portal>
+                            <Menu.Positioner>
+                              <Menu.Content>
+                                <Menu.Item value="edit">Edit</Menu.Item>
+                                <Menu.Item
+                                  value="delete"
+                                  color="fg.error"
+                                  _hover={{ bg: "bg.error", color: "fg.error" }}
+                                >
+                                  Delete...
+                                </Menu.Item>
+                              </Menu.Content>
+                            </Menu.Positioner>
+                          </Portal>
+                        </Menu.Root>{" "}
                       </Table.Cell>
                     </>
                   )}

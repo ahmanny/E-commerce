@@ -1,7 +1,9 @@
 "use client";
 
+import { useFogottenPassword } from "@/lib/utils/hooks/mutations/useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { BeatLoader } from "react-spinners";
 import { z } from "zod";
 
 const schema = z.object({
@@ -13,8 +15,9 @@ export default function ForgottenpasswForm() {
     handleSubmit,
     formState: { errors },
   } = useForm({ resolver: zodResolver(schema) });
+  const forgottenPasswordMutation = useFogottenPassword();
   function submitForm(data: any) {
-    console.log(data);
+    forgottenPasswordMutation.mutate(data);
   }
   return (
     <div className="form-container flex flex-col py-36 items-center h-screen gap-[30px]">
@@ -31,9 +34,22 @@ export default function ForgottenpasswForm() {
               <p className="text-red-500">{String(errors.email.message)}</p>
             )}
           </div>
-          <button type="submit" className="btn">
-            Send reset link
-          </button>
+          <div>
+            <button type="submit" className="btn">
+              {forgottenPasswordMutation.isPending ? (
+                <BeatLoader color="#3498db" />
+              ) : (
+                "Send reset link"
+              )}
+            </button>
+
+            {/* backend errors */}
+            {forgottenPasswordMutation.isError && (
+              <p className=" text-red-500">
+                {String(forgottenPasswordMutation.error?.message)}
+              </p>
+            )}
+          </div>
         </form>
       </div>
     </div>

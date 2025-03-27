@@ -3,8 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import Link from "next/link";
 import { FaCartPlus } from "react-icons/fa";
+import { useLogin } from "@/lib/utils/hooks/mutations/useAuth";
+import { BeatLoader } from "react-spinners";
+import { useRouter } from "next/navigation";
 
 const schema = z.object({
   email: z.string().email("invalid Email"),
@@ -16,9 +18,15 @@ export default function AdminLoginForm() {
     handleSubmit,
     formState: { errors },
   } = useForm({ resolver: zodResolver(schema) });
+  const loginMutation = useLogin();
+  const router = useRouter();
   // function to handle submit form click.
   function submitForm(data: any) {
-    console.log(data);
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        router.push("/admin/dashboard");
+      },
+    });
   }
   return (
     <div className="flex flex-col justify-center items-center py-24 gap-[30px] min-h-screen">
@@ -46,8 +54,14 @@ export default function AdminLoginForm() {
           )}
         </div>
         <button type="submit" className="btn">
-          Login
+          {loginMutation.isPending ? <BeatLoader color="#3498db" /> : "Login"}
         </button>
+        {/* backend errors */}
+        {loginMutation.isError && (
+          <p className=" text-red-500">
+            {String(loginMutation.error?.message)}
+          </p>
+        )}
       </form>
     </div>
   );

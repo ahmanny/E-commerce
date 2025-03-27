@@ -1,81 +1,54 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import React from "react";
+import { useGetProduct } from "@/lib/utils/hooks/queries/useProducts.queries";
+import { useUpdateProduct } from "@/lib/utils/hooks/mutations/useProduct.hooks";
+import { productsinterface } from "@/lib/types/productsTypes";
 import { MdOutlineDriveFolderUpload } from "react-icons/md";
-import { AiOutlineClose } from "react-icons/ai";
-import {
-  useCreateProduct,
-  useUpdateProduct,
-} from "@/lib/utils/hooks/mutations/useProduct.hooks";
 import { BeatLoader } from "react-spinners";
-import { Product, productsinterface } from "@/lib/types/productsTypes";
+import { useRouter } from "next/router";
+import { AiOutlineClose } from "react-icons/ai";
+import ColorSelector from "./ColorSelector";
 
-interface formProps {
-  btnText: string;
+interface UpdateProductFormProps {
+  product: productsinterface;
 }
 
-const productSchema = z.object({
-  title: z.string().min(3, "Title is required"),
-  slug: z.string().min(1, "Slug is required"),
-  sku: z.string().min(1, "Sku is required"),
-  category: z.string().min(1, "category is required"),
-  description: z.string().min(1, "Description is required"),
-  price: z.coerce.number().min(1, "Price must be greater than 0"),
-  quantity_available: z.coerce
-    .number()
-    .min(1, "Available quantity is required"),
-  stock_status: z.string().min(1, "Stock status is required"),
-  colors: z.array(z.string()).min(1, "At least one color must be selected"),
-  images: z.array(z.any()).min(1, "At least one image is required"),
-  sizes: z.array(z.any()).min(1, "select a size"),
-});
-type ProductFormData = z.infer<typeof productSchema>;
+const colors = ["blue", "red", "yellow", "green", "orange"];
 
-const colorClasses: Record<string, string> = {
-  blue: "bg-blue-500",
-  red: "bg-red-500",
-  yellow: "bg-yellow-500",
-  green: "bg-green-500",
-};
-
-const sizes = ["S", "M", "X", "XL", "XXL"];
-export default function ProductForm({ btnText }: formProps) {
+export default function UpdateProduct({ product }: UpdateProductFormProps) {
+  const updateProductMutation = useUpdateProduct();
   const {
     register,
     handleSubmit,
-    setValue,
-    watch,
     reset,
+    watch,
+    setValue,
+    getValues,
     formState: { errors },
-  } = useForm<ProductFormData>({
-    resolver: zodResolver(productSchema),
-  });
+  } = useForm<productsinterface>();
 
-  // preview images selected
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  // watch for changes
   const selectedImages = watch("images") || [];
-  const selectedColors = watch("colors") || [];
-  const selectedSizes = watch("sizes") || [];
+  const selectedColors: string[] = watch("colors") || [];
+  const selectedSizes: string[] = watch("sizes") || [];
 
-  // handle file uploads for images
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      const newImages = Array.from(files);
-      setImageFiles((prev) => [...prev, ...newImages]);
-      setValue("images", [...selectedImages, ...newImages]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [images, setImages] = useState<string[]>([]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setImageFiles([...imageFiles, ...Array.from(e.target.files)]);
     }
   };
 
-  // Remove images
   const removeImage = (index: number) => {
-    const updatedImages = imageFiles.filter((_, i) => i !== index);
-    setImageFiles(updatedImages);
-    setValue("images", updatedImages);
+    setImageFiles(imageFiles.filter((_, i) => i !== index));
+  };
+  const removeUploadedImage = (index: number) => {
+    console.log(index);
+    setImages(images.filter((_, i) => i !== index));
   };
 
   // color upload
@@ -94,40 +67,31 @@ export default function ProductForm({ btnText }: formProps) {
     setValue("sizes", updatedSizes);
   };
 
-  // Mutations
-  const createMutation = useCreateProduct();
-
-  const onSubmit = (data: ProductFormData) => {
-    const formData = new FormData();
-
-    formData.append("title", data.title);
-    formData.append("slug", data.slug);
-    formData.append("sku", data.sku);
-    formData.append("category", data.category);
-    formData.append("description", data.description);
-    formData.append("price", data.price.toString());
-    formData.append("quantity_available", data.quantity_available.toString());
-    formData.append("stock_status", data.stock_status);
-    formData.append("colors", JSON.stringify(data.colors));
-    formData.append("sizes", JSON.stringify(data.sizes));
-    if (imageFiles.length > 0) {
-      imageFiles.forEach((file) => {
-        formData.append("images", file);
-      });
+  //   update form values when product data changes
+  useEffect(() => {
+    if (product && Object.keys(product).length > 0) {
+      reset(product);
+      setValue("colors", product.colors || []);
+      setImages(product.images);
     }
-    createMutation.mutate(formData, {
-      onSuccess: () => {
-        alert("added");
-      },
-      onError: (error) => {
-        console.error("error updating product:", error);
-      },
-    });
-  };
+  }, [product, reset, setValue, setImages]);
 
+  const onSubmit = (data: any) => {
+    updateProductMutation.mutate(
+      { id: product._id, product: data },
+      {
+        onSuccess: () => {
+          alert("updated");
+        },
+      }
+    );
+  };
   return (
     <div>
-      <form onSubmit={handleSubmit(onSubmit)} className="gap-16 flex flex-col">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="gap-16 flex flex-col bg-ora"
+      >
         <div className="flex gap-20">
           <div className="w-80 flex flex-col gap-5 text-[#474B57]">
             {/* title input */}
@@ -284,7 +248,29 @@ export default function ProductForm({ btnText }: formProps) {
                 Choose product images
               </label>
               {/* image previews */}
+
               <div className="mt-3 flex gap-4">
+                {/* Display images from backend */}
+                {images?.map((image, index) => (
+                  <div
+                    key={index}
+                    className="relative w-14 h-14 p-3 bg-[#F6F6F6] flex items-center justify-center rounded-md"
+                  >
+                    <img
+                      src={image} // Use backend image URL
+                      alt={`Existing Image ${index}`}
+                      className="w-full h-full object-cover rounded-md"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeUploadedImage(index)}
+                      className="absolute top-[-13px] right-[-13px] bg-[#f6f6f6] text-black rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                    >
+                      <AiOutlineClose />
+                    </button>
+                  </div>
+                ))}
+                {/* Display newly uploaded images */}
                 {imageFiles.map((file, index) => (
                   <div
                     key={index}
@@ -296,6 +282,7 @@ export default function ProductForm({ btnText }: formProps) {
                       className="w-full h-full object-cover rounded-md"
                     />
                     <button
+                      type="button"
                       onClick={() => removeImage(index)}
                       className="absolute top-[-13px] right-[-13px] bg-[#f6f6f6] text-black rounded-full w-5 h-5 flex items-center justify-center text-xs"
                     >
@@ -304,6 +291,7 @@ export default function ProductForm({ btnText }: formProps) {
                   </div>
                 ))}
               </div>
+
               {errors.images && (
                 <p className="text-red-500 text-sm">
                   {String(errors.images.message)}
@@ -313,43 +301,17 @@ export default function ProductForm({ btnText }: formProps) {
             {/* color selection input */}
             <div>
               <label className="block text-sm font-medium">Colors</label>
-              <div>
-                <div className="flex gap-2 mt-1">
-                  {Object.keys(colorClasses).map((color) => {
-                    const isSelected = selectedColors.includes(color);
-                    return (
-                      <label
-                        key={color}
-                        className="flex items-center space-x-2 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => handleColorChange(color)}
-                          className="hidden"
-                        />
-                        <span
-                          className={`w-6 h-6 rounded-full border ${
-                            isSelected ? "bg-opacity-50" : ""
-                          } ${colorClasses[color]}`}
-                        />
-                      </label>
-                    );
-                  })}
-                </div>
-                {errors.colors?.message && (
-                  <p className="text-red-500 text-sm ">
-                    {String(errors.colors.message)}
-                  </p>
-                )}
-              </div>
+              <ColorSelector
+                handleColorChange={(color) => handleColorChange(color)}
+                selectedColors={selectedColors}
+              />
             </div>
             {/* size selection check */}
             <div>
               <label className="block text-sm font-medium">Sizes</label>
               <div>
                 <div className="flex gap-2 mt-1">
-                  {sizes.map((size) => {
+                  {product?.sizes.map((size) => {
                     const isSelected = selectedSizes.includes(size);
                     return (
                       <label
@@ -384,14 +346,16 @@ export default function ProductForm({ btnText }: formProps) {
         </div>
         <div className="w-48">
           <button type="submit" className="btn">
-            {createMutation.isPending ? (
+            {updateProductMutation.isPending ? (
               <BeatLoader color="#3498db" />
             ) : (
-              btnText
+              "update"
             )}
           </button>
-          {createMutation.isError && (
-            <p className="text-red-500">{createMutation.error.message}</p>
+          {updateProductMutation.isError && (
+            <p className="text-red-500">
+              {updateProductMutation.error.message}
+            </p>
           )}
         </div>
       </form>

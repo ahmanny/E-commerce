@@ -10,7 +10,7 @@ export default function PageTitle() {
 
   return (
     <>
-      <Breadcrumb.Root className="flex gap-2 items-center capitalize text-lg font-semibold">
+      <Breadcrumb.Root className="flex gap-1 items-center capitalize text-lg font-semibold">
         {pathSegments.map((segment, index) => {
           // the url of each of the segments
           const href = `/${pathSegments.slice(0, index + 1).join("/")}`;
@@ -23,21 +23,29 @@ export default function PageTitle() {
             <Breadcrumb.List key={href}>
               {index === pathSegments.length - 1 || index === 0 ? (
                 <>
-                  <Breadcrumb.Item className="flex gap-2 items-center">
-                    <Breadcrumb.CurrentLink>
-                      {formattedSegment}
-                    </Breadcrumb.CurrentLink>
-                  </Breadcrumb.Item>
-                  {index === 0 && <Breadcrumb.Separator className="text-xl" />}
+                  {index === 0 ? (
+                    <Breadcrumb.Item className="flex gap-1 text-[16px]">
+                      <Breadcrumb.CurrentLink className="text-[#5C5F6A]">
+                        {formattedSegment}
+                      </Breadcrumb.CurrentLink>
+                    </Breadcrumb.Item>
+                  ) : (
+                    <Breadcrumb.Item className="flex gap-1 text-[16px]">
+                      <Breadcrumb.CurrentLink>
+                        {formattedSegment}
+                      </Breadcrumb.CurrentLink>
+                    </Breadcrumb.Item>
+                  )}
+                  {index === 0 && <Breadcrumb.Separator className="text-lg" />}
                 </>
               ) : (
                 <>
-                  <Breadcrumb.Item className="flex gap-2 items-center">
+                  <Breadcrumb.Item className="flex gap-1 text-[16px]">
                     <BreadcrumbLink as={Link} href={href}>
                       {formattedSegment}
                     </BreadcrumbLink>
                   </Breadcrumb.Item>
-                  <Breadcrumb.Separator className="text-xl" />
+                  <Breadcrumb.Separator className="text-lg" />
                 </>
               )}
             </Breadcrumb.List>

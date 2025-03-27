@@ -10,14 +10,18 @@ export default function MainLayout({
   const title = pathname.split("/").pop()?.replace(/-/g, " ") || "Home";
 
   return (
-    <div className="w-screen">
-      <div className=" flex flex-col justify-center items-center bg-[#F6F6F6] w-screen h-[160px]">
-        <div className="w-3/5">
-          <h1 className="text-[26px] font-bold mb-3 capitalize">{title}</h1>
-          <PageTitle title={title} />
+    <div>
+      <div className="bg-white">
+        <div className="py-4 bg-[#F6F6F6]  h-[140px] flex flex-col justify-center items-center">
+          <div className="w-[1180px]">
+            <h1 className="text-[20px] font-bold mb-3 capitalize">{title}</h1>
+            <PageTitle />
+          </div>
+        </div>
+        <div className="container mx-auto min-h-screen py-2 w-full">
+          {children}
         </div>
       </div>
-      <div className="container mx-auto min-h-screen">{children}</div>
     </div>
   );
 }
