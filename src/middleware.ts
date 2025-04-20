@@ -3,24 +3,39 @@ import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
     const token = req.cookies.get("access-token")?.value;
+    const role = req.cookies.get("user-role")?.value;
     const url = req.nextUrl;
-    const resetToken = url.searchParams.get("token")
 
-    // console.log("middleware", url.pathname);
-    // console.log("token from cookies", token);
-    // console.log("url token", resetToken);
-
-
-    // protect admin pages 
-    // if ((!token && url.pathname.startsWith("/admin")) && url.pathname !== "/admin/login") {
-    //     return NextResponse.redirect(new URL("/admin/login", req.url));
-    // }
-
-    // protect reset pages to be only accessed when there is a token in the url
-    if (!resetToken && url.pathname.startsWith("/auth/reset-password")) {
-        return NextResponse.redirect(new URL("/auth/forgotten-password", req.url))
+    // // Protect admin pages
+    if (url.pathname.startsWith("/admin")) {
+        if ((!token && role !== "admin") && url.pathname !== "/admin/login") {
+            const callbackUrl = encodeURIComponent(url.pathname);
+            return NextResponse.redirect(new URL(`/admin/login?callbackUrl=${callbackUrl}`, req.url));
+        }
     }
+
+    // Profile access
+    if (url.pathname.startsWith("/profile") && !token) {
+        const callbackUrl = encodeURIComponent(url.pathname);
+        return NextResponse.redirect(new URL(`/auth/login?callbackUrl=${callbackUrl}`, req.url));
+    }
+
+    // product review access
+    if (url.pathname.startsWith("/products/") && !token && url.searchParams.has("review")) {
+        const callbackUrl = encodeURIComponent(url.pathname + url.search);
+        return NextResponse.redirect(new URL(`/auth/login?callbackUrl=${callbackUrl}`, req.url));
+    }
+
+    // Reset password protection
+    if (url.pathname.startsWith("/auth/reset-password")) {
+        const resetToken = url.searchParams.get("token");
+        if (!resetToken) {
+            return NextResponse.redirect(new URL("/auth/forgotten-password", req.url));
+        }
+    }
+
+
     return NextResponse.next();
 }
 
-export const config = { matcher: ["/admin/:path*", "/auth/reset-password(.*)"] };
+export const config = { matcher: ["/admin/:path*", "/profile/:path*", "/products/:path", "/auth/reset-password(.*)"] };

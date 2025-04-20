@@ -2,25 +2,40 @@
 
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import React from "react";
-import { useGetProduct } from "@/lib/utils/hooks/queries/useProducts.queries";
-import { useUpdateProduct } from "@/lib/utils/hooks/mutations/useProduct.hooks";
-import { productsinterface } from "@/lib/types/productsTypes";
+import { useUpdateProduct } from "@/lib/utils/hooks/mutations/product.mutations";
+import { productsinterface } from "@/lib/types/products.types";
 import { MdOutlineDriveFolderUpload } from "react-icons/md";
 import { BeatLoader } from "react-spinners";
-import { useRouter } from "next/router";
 import { AiOutlineClose } from "react-icons/ai";
-import ColorSelector from "./ColorSelector";
+import { useRouter } from "next/navigation";
+import {
+  genders,
+  generateSKU,
+  HIGHLIGHT_OPTIONS,
+  materials,
+  slugify,
+  stockStatus,
+} from "@/lib/utils/products.utils";
+import { CreatableMultiSelect } from "../../../Form/CreatableMultiSelect";
+import toast from "react-hot-toast";
+import SizeMultiSlector from "../../../Form/SizeMultiSlector";
+import ColorMultiSelector from "../../../Form/ColorMultiSelector";
+import SelectInput from "../../../Form/SelectInput";
+import TextInput from "@/components/Form/TextInput";
+import NumberInput from "../../../Form/NumberInput";
+import TextereaInput from "@/components/Form/TextereaInput";
+import { useCategoryStore } from "@/store/categoryStore";
 
 interface UpdateProductFormProps {
   product: productsinterface;
 }
 
-const colors = ["blue", "red", "yellow", "green", "orange"];
-
 export default function UpdateProduct({ product }: UpdateProductFormProps) {
   const updateProductMutation = useUpdateProduct();
+  const { categories } = useCategoryStore();
+  const router = useRouter();
   const {
+    control,
     register,
     handleSubmit,
     reset,
@@ -30,25 +45,30 @@ export default function UpdateProduct({ product }: UpdateProductFormProps) {
     formState: { errors },
   } = useForm<productsinterface>();
 
-  const selectedImages = watch("images") || [];
+  // watch for changes in colors,sizes
   const selectedColors: string[] = watch("colors") || [];
   const selectedSizes: string[] = watch("sizes") || [];
+  const selectedHighligts: string[] = watch("highlights") || [];
+  const formTitle = watch("title");
 
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [newimageFiles, setNewImageFiles] = useState<File[]>([]);
   const [images, setImages] = useState<string[]>([]);
 
+  // handle file uploads for images
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setImageFiles([...imageFiles, ...Array.from(e.target.files)]);
+      setNewImageFiles([...newimageFiles, ...Array.from(e.target.files)]);
     }
   };
-
+  // Remove images
   const removeImage = (index: number) => {
-    setImageFiles(imageFiles.filter((_, i) => i !== index));
+    setNewImageFiles(newimageFiles.filter((_, i) => i !== index));
   };
+  // Remove an uploaded image
   const removeUploadedImage = (index: number) => {
-    console.log(index);
-    setImages(images.filter((_, i) => i !== index));
+    const updatedImages = images.filter((_, i) => i !== index);
+    setImages(updatedImages);
+    setValue("images", updatedImages);
   };
 
   // color upload
@@ -70,22 +90,56 @@ export default function UpdateProduct({ product }: UpdateProductFormProps) {
   //   update form values when product data changes
   useEffect(() => {
     if (product && Object.keys(product).length > 0) {
-      reset(product);
-      setValue("colors", product.colors || []);
+      reset({
+        ...product,
+        categories: product.categories.map((cat) =>
+          typeof cat === "string" ? cat : cat.name
+        ),
+      });
       setImages(product.images);
     }
-  }, [product, reset, setValue, setImages]);
+    if (formTitle) {
+      const slug = slugify(formTitle);
+      const sku = generateSKU(formTitle);
+      setValue("sku", sku);
+      setValue("slug", slug);
+    }
+  }, [product, formTitle, setValue, reset, setImages]);
 
-  const onSubmit = (data: any) => {
+  // submit update products form
+  const onSubmit = (data: productsinterface) => {
+    const formData = new FormData();
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (key === "images") {
+        formData.append("images", JSON.stringify(value));
+      } else if (
+        key === "colors" ||
+        key === "sizes" ||
+        key === "categories" ||
+        key === "highlights"
+      ) {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, value.toString());
+      }
+    });
+
+    newimageFiles.forEach((file) => {
+      formData.append("newImages", file);
+    });
+
     updateProductMutation.mutate(
-      { id: product._id, product: data },
+      { id: product._id, product: formData },
       {
         onSuccess: () => {
-          alert("updated");
+          toast.success("Product updated successfully!");
+          router.push("/admin/products");
         },
       }
     );
   };
+
   return (
     <div>
       <form
@@ -93,142 +147,96 @@ export default function UpdateProduct({ product }: UpdateProductFormProps) {
         className="gap-16 flex flex-col bg-ora"
       >
         <div className="flex gap-20">
-          <div className="w-80 flex flex-col gap-5 text-[#474B57]">
+          <div className="w-96 flex flex-col gap-5 text-[#474B57]">
             {/* title input */}
-            <div className=" flex-col flex ">
-              <label htmlFor="title" className="block text-sm font-medium">
-                Title
-              </label>
-              <input {...register("title")} id="title" className=" input" />
-              {errors.title?.message && (
-                <p className="text-red-500 text-sm">
-                  {String(errors.title.message)}
-                </p>
-              )}
-            </div>
+            <TextInput
+              label="Title"
+              name="title"
+              register={register}
+              errors={errors}
+            />
             {/* price input */}
-            <div className=" flex-col flex ">
-              <label htmlFor="price" className="block text-sm font-medium">
-                Price
-              </label>
-              <input
-                type="number"
-                {...register("price", { valueAsNumber: true })}
-                id="price"
-                className=" input"
-              />
-              {errors.price?.message && (
-                <p className="text-red-500 text-sm">
-                  {String(errors.price.message)}
-                </p>
-              )}
-            </div>
+            <NumberInput
+              label="Price (USD)"
+              name="price"
+              register={register}
+              errors={errors}
+            />
             {/* category input/dropdown */}
-            <div className=" flex-col flex ">
-              <label htmlFor="category" className="block text-sm font-medium">
-                Category
-              </label>
-              <select
-                id="category"
-                {...register("category")}
-                className="input bg-white cursor-pointer"
-              >
-                <option value=""></option>
-                <option value="dress">Dress shoes</option>
-                <option value="casual">Casual Shoes</option>
-                <option value="boots">Boots</option>
-                <option value="sandals">Sandals</option>
-              </select>
-              {errors.category?.message && (
-                <p className="text-red-500 text-sm">
-                  {String(errors.category.message)}
-                </p>
-              )}
-            </div>
+            <CreatableMultiSelect
+              label="Category"
+              errors={errors}
+              name="categories"
+              control={control}
+              options={categories}
+              placeholder="select or type categories"
+            />
             {/* slug input */}
-            <div className=" flex-col flex ">
-              <label htmlFor="slug" className="block text-sm font-medium">
-                Slug
-              </label>
-              <input {...register("slug")} id="slug" className=" input" />
-              {errors.slug?.message && (
-                <p className="text-red-500 text-sm">
-                  {String(errors.slug.message)}
-                </p>
-              )}
-            </div>
+            <TextInput
+              label="Slug"
+              name="slug"
+              register={register}
+              errors={errors}
+              isReadOnly={true}
+            />
             {/* sku input */}
-            <div className=" flex-col flex ">
-              <label htmlFor="sku" className="block text-sm font-medium">
-                SKU
-              </label>
-              <input {...register("sku")} id="sku" className=" input" />
-              {errors.sku && (
-                <p className="text-red-500 text-sm">
-                  {String(errors.sku.message)}
-                </p>
-              )}
-            </div>
+            <TextInput
+              label="SKU"
+              name="sku"
+              register={register}
+              errors={errors}
+              isReadOnly={true}
+            />
+            {/* category input/dropdown */}
+            <CreatableMultiSelect
+              label="Highlights"
+              errors={errors}
+              name="highlights"
+              control={control}
+              options={HIGHLIGHT_OPTIONS}
+              placeholder="select or type highlights"
+            />
             {/* description input */}
-            <div className=" flex-col flex ">
-              <label
-                htmlFor="description"
-                className="block text-sm font-medium"
-              >
-                Description
-              </label>
-              <textarea
-                {...register("description")}
-                id="description"
-                className=" input h-28"
-              />
-              {errors.description?.message && (
-                <p className="text-red-500 text-sm">
-                  {String(errors.description.message)}
-                </p>
-              )}
-            </div>
+            <TextereaInput
+              label="Description"
+              name="description"
+              register={register}
+              errors={errors}
+            />
           </div>
-          <div className="w-80 flex flex-col gap-5 text-[#474B57]">
+          {/* Right side of the foorm */}
+          <div className="w-96 flex flex-col gap-5 text-[#474B57]">
+            {/* select shoe material */}
+            <SelectInput
+              label="Material"
+              name="material"
+              options={materials}
+              register={register}
+              errors={errors}
+            />
+            {/* select shoe gender */}
+            <SelectInput
+              label="Gender"
+              name="gender"
+              options={genders}
+              register={register}
+              errors={errors}
+            />
             {/* stock_status input */}
-            <div className=" flex-col flex ">
-              <label
-                htmlFor="stock_status"
-                className="block text-sm font-medium"
-              >
-                Stock status
-              </label>
-              <input
-                {...register("stock_status")}
-                id="stock_status"
-                className=" input"
-              />
-              {errors.stock_status?.message && (
-                <p className="text-red-500 text-sm">
-                  {String(errors.stock_status.message)}
-                </p>
-              )}
-            </div>
+            <SelectInput
+              label="Stock status"
+              name="stock_status"
+              options={stockStatus}
+              register={register}
+              errors={errors}
+            />
             {/* quantity_available input */}
-            <div className=" flex-col flex ">
-              <label
-                htmlFor="quantity_available"
-                className="block text-sm font-medium"
-              >
-                Available quantity
-              </label>
-              <input
-                type="number"
-                {...register("quantity_available")}
-                id="quantity_available"
-                className=" input"
-              />
-              {errors.quantity_available?.message && (
-                <p className="text-red-500 text-sm">
-                  {String(errors.quantity_available.message)}
-                </p>
-              )}
-            </div>
+            <NumberInput
+              label="Available quantity"
+              name="quantity_available"
+              register={register}
+              errors={errors}
+            />
             {/* upload product image */}
             <div className=" flex-col flex ">
               <label className="block text-sm font-medium">Images</label>
@@ -271,7 +279,7 @@ export default function UpdateProduct({ product }: UpdateProductFormProps) {
                   </div>
                 ))}
                 {/* Display newly uploaded images */}
-                {imageFiles.map((file, index) => (
+                {newimageFiles.map((file, index) => (
                   <div
                     key={index}
                     className="relative w-14  h-14 p-3  bg-[#F6F6F6] flex items-center justify-center rounded-md"
@@ -299,64 +307,38 @@ export default function UpdateProduct({ product }: UpdateProductFormProps) {
               )}
             </div>
             {/* color selection input */}
-            <div>
-              <label className="block text-sm font-medium">Colors</label>
-              <ColorSelector
-                handleColorChange={(color) => handleColorChange(color)}
-                selectedColors={selectedColors}
-              />
-            </div>
+            <ColorMultiSelector
+              handleColorChange={(color) => handleColorChange(color)}
+              errors={errors}
+              label="Colors"
+              name="colors"
+              selectedColors={selectedColors}
+            />
             {/* size selection check */}
-            <div>
-              <label className="block text-sm font-medium">Sizes</label>
-              <div>
-                <div className="flex gap-2 mt-1">
-                  {product?.sizes.map((size) => {
-                    const isSelected = selectedSizes.includes(size);
-                    return (
-                      <label
-                        key={size}
-                        className="flex items-center space-x-2 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => handleSizeChange(size)}
-                          className="hidden"
-                        />
-                        <span
-                          className={` h-10 w-10 border text-sm rounded-md flex items-center  justify-center ${
-                            isSelected ? "bg-gray-200" : ""
-                          }`}
-                        >
-                          {size}
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
-                {errors.sizes?.message && (
-                  <p className="text-red-500 text-sm ">
-                    {String(errors.sizes.message)}
-                  </p>
-                )}
-              </div>
-            </div>
+            <SizeMultiSlector
+              errors={errors}
+              handleSizeChange={(size) => handleSizeChange(size)}
+              label="Sizes"
+              name="sizes"
+              selectedSizes={selectedSizes}
+            />
           </div>
         </div>
-        <div className="w-48">
-          <button type="submit" className="btn">
+
+        {/* submit button and error display */}
+        <div>
+          {updateProductMutation.isError && (
+            <p className="text-red-500">
+              {updateProductMutation.error.message}
+            </p>
+          )}
+          <button type="submit" className="btn !w-48">
             {updateProductMutation.isPending ? (
               <BeatLoader color="#3498db" />
             ) : (
               "update"
             )}
           </button>
-          {updateProductMutation.isError && (
-            <p className="text-red-500">
-              {updateProductMutation.error.message}
-            </p>
-          )}
         </div>
       </form>
     </div>

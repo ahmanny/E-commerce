@@ -1,6 +1,6 @@
 "use client";
 
-import { useResetPassword } from "@/lib/utils/hooks/mutations/useAuth";
+import { useResetPassword } from "@/lib/utils/hooks/mutations/auth.mutations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";

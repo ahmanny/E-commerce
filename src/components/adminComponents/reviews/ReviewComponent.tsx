@@ -1,6 +1,6 @@
 "use client";
 
-import TableComponent from "../TableComponent";
+import TableComponent from "../../tableComponent";
 const tableHeader = ["name", "review"];
 const reviews = [
   {

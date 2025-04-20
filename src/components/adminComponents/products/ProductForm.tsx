@@ -1,27 +1,49 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import TextInput from "../../Form/TextInput";
+import { CreatableMultiSelect } from "../../Form/CreatableMultiSelect";
+import {
+  genders,
+  generateSKU,
+  HIGHLIGHT_OPTIONS,
+  materials,
+  slugify,
+  stockStatus,
+} from "@/lib/utils/products.utils";
+import TextereaInput from "../../Form/TextereaInput";
+import SelectInput from "../../Form/SelectInput";
 import { MdOutlineDriveFolderUpload } from "react-icons/md";
 import { AiOutlineClose } from "react-icons/ai";
-import {
-  useCreateProduct,
-  useUpdateProduct,
-} from "@/lib/utils/hooks/mutations/useProduct.hooks";
+import NumberInput from "../../Form/NumberInput";
+import ColorMultiSelector from "@/components/Form/ColorMultiSelector";
+import SizeMultiSlector from "@/components/Form/SizeMultiSlector";
+import { useCreateProduct } from "@/lib/utils/hooks/mutations/product.mutations";
+import { useRouter } from "next/navigation";
 import { BeatLoader } from "react-spinners";
-import { Product, productsinterface } from "@/lib/types/productsTypes";
+import toast from "react-hot-toast";
+import { useCategoryStore } from "@/store/categoryStore";
 
 interface formProps {
   btnText: string;
 }
 
+// form schema with Zod
 const productSchema = z.object({
   title: z.string().min(3, "Title is required"),
   slug: z.string().min(1, "Slug is required"),
-  sku: z.string().min(1, "Sku is required"),
-  category: z.string().min(1, "category is required"),
+  sku: z.string().min(1, "Slug is required"),
+  categories: z
+    .array(z.string().min(4, "Category must be a word"))
+    .min(1, "Category is required"),
+  highlights: z
+    .array(z.string().min(4, "highlights must be a word"))
+    .min(1, "you must select atleast one highlight"),
+  gender: z.string().min(1, "please select a gender"),
+  material: z.string().min(1, "please select a material"),
   description: z.string().min(1, "Description is required"),
   price: z.coerce.number().min(1, "Price must be greater than 0"),
   quantity_available: z.coerce
@@ -34,16 +56,15 @@ const productSchema = z.object({
 });
 type ProductFormData = z.infer<typeof productSchema>;
 
-const colorClasses: Record<string, string> = {
-  blue: "bg-blue-500",
-  red: "bg-red-500",
-  yellow: "bg-yellow-500",
-  green: "bg-green-500",
-};
-
-const sizes = ["S", "M", "X", "XL", "XXL"];
 export default function ProductForm({ btnText }: formProps) {
+  const { categories } = useCategoryStore();
+
+  const createMutation = useCreateProduct();
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const router = useRouter();
+
   const {
+    control,
     register,
     handleSubmit,
     setValue,
@@ -54,23 +75,29 @@ export default function ProductForm({ btnText }: formProps) {
     resolver: zodResolver(productSchema),
   });
 
-  // preview images selected
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  // watch for changes
+  // watch for changes in colors,images,sizes
   const selectedImages = watch("images") || [];
   const selectedColors = watch("colors") || [];
   const selectedSizes = watch("sizes") || [];
+  const formTitle = watch("title");
+  useEffect(() => {
+    if (formTitle) {
+      const slug = slugify(formTitle);
+      const sku = generateSKU(formTitle);
+      setValue("sku", sku);
+      setValue("slug", slug);
+    }
+  }, [formTitle, setValue]);
 
   // handle file uploads for images
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
       const newImages = Array.from(files);
-      setImageFiles((prev) => [...prev, ...newImages]);
+      setImageFiles((p) => [...p, ...newImages]);
       setValue("images", [...selectedImages, ...newImages]);
     }
   };
-
   // Remove images
   const removeImage = (index: number) => {
     const updatedImages = imageFiles.filter((_, i) => i !== index);
@@ -93,23 +120,21 @@ export default function ProductForm({ btnText }: formProps) {
       : [...selectedSizes, size];
     setValue("sizes", updatedSizes);
   };
-
-  // Mutations
-  const createMutation = useCreateProduct();
-
+  // on submit function
   const onSubmit = (data: ProductFormData) => {
     const formData = new FormData();
-
-    formData.append("title", data.title);
-    formData.append("slug", data.slug);
-    formData.append("sku", data.sku);
-    formData.append("category", data.category);
-    formData.append("description", data.description);
-    formData.append("price", data.price.toString());
-    formData.append("quantity_available", data.quantity_available.toString());
-    formData.append("stock_status", data.stock_status);
-    formData.append("colors", JSON.stringify(data.colors));
-    formData.append("sizes", JSON.stringify(data.sizes));
+    Object.entries(data).forEach(([key, value]) => {
+      if (
+        key === "colors" ||
+        key === "sizes" ||
+        key === "categories" ||
+        key === "highlights"
+      ) {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, value.toString());
+      }
+    });
     if (imageFiles.length > 0) {
       imageFiles.forEach((file) => {
         formData.append("images", file);
@@ -117,154 +142,110 @@ export default function ProductForm({ btnText }: formProps) {
     }
     createMutation.mutate(formData, {
       onSuccess: () => {
-        alert("added");
+        toast.success("Product added successfully!");
+        router.push("/admin/products");
       },
       onError: (error) => {
-        console.error("error updating product:", error);
+        toast.error(error.message);
       },
     });
   };
-
   return (
     <div>
       <form onSubmit={handleSubmit(onSubmit)} className="gap-16 flex flex-col">
         <div className="flex gap-20">
-          <div className="w-80 flex flex-col gap-5 text-[#474B57]">
+          {/* left side of the form with title,price,category,slug,sku,desription inputs*/}
+          <div className="w-96 flex flex-col gap-5 text-[#474B57]">
             {/* title input */}
-            <div className=" flex-col flex ">
-              <label htmlFor="title" className="block text-sm font-medium">
-                Title
-              </label>
-              <input {...register("title")} id="title" className=" input" />
-              {errors.title?.message && (
-                <p className="text-red-500 text-sm">
-                  {String(errors.title.message)}
-                </p>
-              )}
-            </div>
+            <TextInput
+              label="Title"
+              name="title"
+              register={register}
+              errors={errors}
+            />
             {/* price input */}
-            <div className=" flex-col flex ">
-              <label htmlFor="price" className="block text-sm font-medium">
-                Price
-              </label>
-              <input
-                type="number"
-                {...register("price", { valueAsNumber: true })}
-                id="price"
-                className=" input"
-              />
-              {errors.price?.message && (
-                <p className="text-red-500 text-sm">
-                  {String(errors.price.message)}
-                </p>
-              )}
-            </div>
+            <NumberInput
+              label="Price (USD)"
+              name="price"
+              register={register}
+              errors={errors}
+            />
             {/* category input/dropdown */}
-            <div className=" flex-col flex ">
-              <label htmlFor="category" className="block text-sm font-medium">
-                Category
-              </label>
-              <select
-                id="category"
-                {...register("category")}
-                className="input bg-white cursor-pointer"
-              >
-                <option value=""></option>
-                <option value="dress">Dress shoes</option>
-                <option value="casual">Casual Shoes</option>
-                <option value="boots">Boots</option>
-                <option value="sandals">Sandals</option>
-              </select>
-              {errors.category?.message && (
-                <p className="text-red-500 text-sm">
-                  {String(errors.category.message)}
-                </p>
-              )}
-            </div>
+            <CreatableMultiSelect
+              label="Category"
+              errors={errors}
+              name="categories"
+              control={control}
+              options={categories}
+              placeholder="select or type categories"
+            />
             {/* slug input */}
-            <div className=" flex-col flex ">
-              <label htmlFor="slug" className="block text-sm font-medium">
-                Slug
-              </label>
-              <input {...register("slug")} id="slug" className=" input" />
-              {errors.slug?.message && (
-                <p className="text-red-500 text-sm">
-                  {String(errors.slug.message)}
-                </p>
-              )}
-            </div>
+            <TextInput
+              label="Slug"
+              name="slug"
+              isReadOnly={true}
+              register={register}
+              errors={errors}
+            />
             {/* sku input */}
-            <div className=" flex-col flex ">
-              <label htmlFor="sku" className="block text-sm font-medium">
-                SKU
-              </label>
-              <input {...register("sku")} id="sku" className=" input" />
-              {errors.sku && (
-                <p className="text-red-500 text-sm">
-                  {String(errors.sku.message)}
-                </p>
-              )}
-            </div>
+            <TextInput
+              label="SKU"
+              name="sku"
+              register={register}
+              errors={errors}
+              isReadOnly={true}
+            />
+            {/* category input/dropdown */}
+            <CreatableMultiSelect
+              label="Highlights"
+              errors={errors}
+              name="highlights"
+              control={control}
+              options={HIGHLIGHT_OPTIONS}
+              placeholder="select or type categories"
+            />
             {/* description input */}
-            <div className=" flex-col flex ">
-              <label
-                htmlFor="description"
-                className="block text-sm font-medium"
-              >
-                Description
-              </label>
-              <textarea
-                {...register("description")}
-                id="description"
-                className=" input h-28"
-              />
-              {errors.description?.message && (
-                <p className="text-red-500 text-sm">
-                  {String(errors.description.message)}
-                </p>
-              )}
-            </div>
+            <TextereaInput
+              label="Description"
+              name="description"
+              register={register}
+              errors={errors}
+            />
           </div>
-          <div className="w-80 flex flex-col gap-5 text-[#474B57]">
+
+          {/* right side of the form with gender,material,stack status, quantity,image upload,colorselct,size select input*/}
+          <div className="w-96 flex flex-col gap-5 text-[#474B57]">
+            {/* select shoe material */}
+            <SelectInput
+              label="Material"
+              name="material"
+              options={materials}
+              register={register}
+              errors={errors}
+            />
+            {/* select shoe gender */}
+            <SelectInput
+              label="Gender"
+              name="gender"
+              options={genders}
+              register={register}
+              errors={errors}
+            />
             {/* stock_status input */}
-            <div className=" flex-col flex ">
-              <label
-                htmlFor="stock_status"
-                className="block text-sm font-medium"
-              >
-                Stock status
-              </label>
-              <input
-                {...register("stock_status")}
-                id="stock_status"
-                className=" input"
-              />
-              {errors.stock_status?.message && (
-                <p className="text-red-500 text-sm">
-                  {String(errors.stock_status.message)}
-                </p>
-              )}
-            </div>
+            <SelectInput
+              label="Stock status"
+              name="stock_status"
+              options={stockStatus}
+              register={register}
+              errors={errors}
+            />
             {/* quantity_available input */}
-            <div className=" flex-col flex ">
-              <label
-                htmlFor="quantity_available"
-                className="block text-sm font-medium"
-              >
-                Available quantity
-              </label>
-              <input
-                type="number"
-                {...register("quantity_available")}
-                id="quantity_available"
-                className=" input"
-              />
-              {errors.quantity_available?.message && (
-                <p className="text-red-500 text-sm">
-                  {String(errors.quantity_available.message)}
-                </p>
-              )}
-            </div>
+            <NumberInput
+              label="Available quantity"
+              name="quantity_available"
+              register={register}
+              errors={errors}
+            />
             {/* upload product image */}
             <div className=" flex-col flex ">
               <label className="block text-sm font-medium">Images</label>
@@ -310,89 +291,39 @@ export default function ProductForm({ btnText }: formProps) {
                 </p>
               )}
             </div>
+
             {/* color selection input */}
-            <div>
-              <label className="block text-sm font-medium">Colors</label>
-              <div>
-                <div className="flex gap-2 mt-1">
-                  {Object.keys(colorClasses).map((color) => {
-                    const isSelected = selectedColors.includes(color);
-                    return (
-                      <label
-                        key={color}
-                        className="flex items-center space-x-2 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => handleColorChange(color)}
-                          className="hidden"
-                        />
-                        <span
-                          className={`w-6 h-6 rounded-full border ${
-                            isSelected ? "bg-opacity-50" : ""
-                          } ${colorClasses[color]}`}
-                        />
-                      </label>
-                    );
-                  })}
-                </div>
-                {errors.colors?.message && (
-                  <p className="text-red-500 text-sm ">
-                    {String(errors.colors.message)}
-                  </p>
-                )}
-              </div>
-            </div>
+            <ColorMultiSelector
+              handleColorChange={(color) => handleColorChange(color)}
+              errors={errors}
+              label="Colors"
+              name="colors"
+              selectedColors={selectedColors}
+            />
+
             {/* size selection check */}
-            <div>
-              <label className="block text-sm font-medium">Sizes</label>
-              <div>
-                <div className="flex gap-2 mt-1">
-                  {sizes.map((size) => {
-                    const isSelected = selectedSizes.includes(size);
-                    return (
-                      <label
-                        key={size}
-                        className="flex items-center space-x-2 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => handleSizeChange(size)}
-                          className="hidden"
-                        />
-                        <span
-                          className={` h-10 w-10 border text-sm rounded-md flex items-center  justify-center ${
-                            isSelected ? "bg-gray-200" : ""
-                          }`}
-                        >
-                          {size}
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
-                {errors.sizes?.message && (
-                  <p className="text-red-500 text-sm ">
-                    {String(errors.sizes.message)}
-                  </p>
-                )}
-              </div>
-            </div>
+            <SizeMultiSlector
+              errors={errors}
+              handleSizeChange={(size) => handleSizeChange(size)}
+              label="Sizes"
+              name="sizes"
+              selectedSizes={selectedSizes}
+            />
           </div>
         </div>
-        <div className="w-48">
-          <button type="submit" className="btn">
+
+        {/* submit button and error display */}
+        <div>
+          {createMutation.isError && (
+            <p className="text-red-500">{createMutation.error.message}</p>
+          )}
+          <button type="submit" className="btn !w-48">
             {createMutation.isPending ? (
               <BeatLoader color="#3498db" />
             ) : (
               btnText
             )}
           </button>
-          {createMutation.isError && (
-            <p className="text-red-500">{createMutation.error.message}</p>
-          )}
         </div>
       </form>
     </div>

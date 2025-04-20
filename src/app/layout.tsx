@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "../styles/globals.css";
 import { Provider } from "@/components/ui/provider";
 import QueryProvider from "@/lib/providers/QueryProvider";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "E-commerce",
@@ -16,6 +17,7 @@ export default function RootLayout({
       <body>
         <Provider>
           <QueryProvider>
+            <Toaster position="top-center" />
             <main>{children}</main>
           </QueryProvider>
         </Provider>

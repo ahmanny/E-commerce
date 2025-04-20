@@ -25,5 +25,8 @@ body {
   @apply bg-black text-white bg-opacity-80 w-full h-[48px] flex justify-center items-center rounded-md hover:bg-opacity-100 transition;
 }
 .input {
-  @apply border-gray-200 border border-solid p-2 w-full rounded-[5px] outline-none focus:border-blue-500;
+  @apply border-gray-200 border border-solid p-2 w-full h-[48px] rounded-[5px] outline-none focus:border-blue-500;
+}
+.label {
+  @apply block text-base font-medium;
 }

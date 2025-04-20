@@ -1,4 +1,4 @@
-import TableComponent from "../TableComponent";
+import TableComponent from "../../tableComponent";
 
 const tableHeader = ["name", "email", "shipping address"];
 const customers = [

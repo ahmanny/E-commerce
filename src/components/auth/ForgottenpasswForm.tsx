@@ -1,6 +1,6 @@
 "use client";
 
-import { useFogottenPassword } from "@/lib/utils/hooks/mutations/useAuth";
+import { useFogottenPassword } from "@/lib/utils/hooks/mutations/auth.mutations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { BeatLoader } from "react-spinners";

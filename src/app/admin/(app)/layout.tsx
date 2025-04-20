@@ -1,7 +1,7 @@
 "use client";
 
+import AdminBreadcrumb from "@/components/breadcrumbs/AdminBreadcrumb";
 import AdminNavBar from "@/components/adminComponents/AdminNavBar";
-import PageTitle from "@/components/app/PageTitle";
 import { usePathname } from "next/navigation";
 import { TbLogout } from "react-icons/tb";
 
@@ -19,7 +19,7 @@ export default function AdminAppLayout({
       </div>
       <div className="container   min-h-screen flex-1 pt-5">
         <div className=" h-[75px]  flex justify-between items-center pr-8">
-          <PageTitle />
+          <AdminBreadcrumb />
           <button>
             <TbLogout className="text-2xl" />
           </button>

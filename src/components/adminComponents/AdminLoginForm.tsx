@@ -4,9 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { FaCartPlus } from "react-icons/fa";
-import { useLogin } from "@/lib/utils/hooks/mutations/useAuth";
+import { useAdminLogin } from "@/lib/utils/hooks/mutations/auth.mutations";
 import { BeatLoader } from "react-spinners";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const schema = z.object({
   email: z.string().email("invalid Email"),
@@ -18,13 +18,15 @@ export default function AdminLoginForm() {
     handleSubmit,
     formState: { errors },
   } = useForm({ resolver: zodResolver(schema) });
-  const loginMutation = useLogin();
+  const loginMutation = useAdminLogin();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/admin/dashboard";
   const router = useRouter();
   // function to handle submit form click.
   function submitForm(data: any) {
     loginMutation.mutate(data, {
       onSuccess: () => {
-        router.push("/admin/dashboard");
+        router.push(callbackUrl);
       },
     });
   }

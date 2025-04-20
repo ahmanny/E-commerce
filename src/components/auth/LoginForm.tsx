@@ -5,9 +5,11 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import GoogleSignin from "./GoogleSignin";
 import Link from "next/link";
-import { useLogin } from "@/lib/utils/hooks/mutations/useAuth";
+import { useLogin } from "@/lib/utils/hooks/mutations/auth.mutations";
 import { Spinner } from "@chakra-ui/react";
 import { BeatLoader } from "react-spinners";
+import { useRouter, useSearchParams } from "next/navigation";
+import TextInput from "../Form/TextInput";
 
 const schema = z.object({
   email: z.string().email("invalid Email"),
@@ -20,9 +22,16 @@ export default function LoginForm() {
     formState: { errors },
   } = useForm({ resolver: zodResolver(schema) });
   const loginMutation = useLogin();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
   // function to handle submit form click.
   function submitForm(data: any) {
-    loginMutation.mutate(data);
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        router.push(callbackUrl);
+      },
+    });
   }
   return (
     <div className="flex flex-col justify-center items-center py-24 gap-[30px]">
@@ -34,21 +43,19 @@ export default function LoginForm() {
         className=" flex flex-col gap-[15px] w-[350px]"
       >
         {/* email input  */}
-        <div className=" flex-col flex ">
-          <label htmlFor="email">Email</label>
-          <input {...register("email")} id="email" className=" input" />
-          {errors.email?.message && (
-            <p className="text-red-500">{String(errors.email.message)}</p>
-          )}
-        </div>
+        <TextInput
+          name="email"
+          label="Email"
+          register={register}
+          errors={errors}
+        />
         {/* password input */}
-        <div className=" flex-col flex ">
-          <label htmlFor="password">Password</label>
-          <input {...register("password")} id="password" className=" input" />
-          {errors.password?.message && (
-            <p className="text-red-500">{String(errors.password.message)}</p>
-          )}
-        </div>
+        <TextInput
+          name="password"
+          label="Password"
+          register={register}
+          errors={errors}
+        />
         {/* forgotten password button */}
         <div className=" w-full flex justify-end">
           <Link
@@ -71,7 +78,7 @@ export default function LoginForm() {
       </form>
       <div>
         <p>
-          Don't have an account? <Link href="/sign-up"> Sign up</Link>
+          Don't have an account? <Link href="/auth/sign-up"> Sign up</Link>
         </p>
       </div>
     </div>
