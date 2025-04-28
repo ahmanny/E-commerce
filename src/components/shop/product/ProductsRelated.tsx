@@ -3,8 +3,8 @@
 import EmptyState from "@/components/states/EmptyState";
 import ErrorState from "@/components/states/ErrorState";
 import { useGetSimilarProducts } from "@/lib/utils/hooks/queries/products.queries";
-import ProductCarousel from "../ProductCarousel";
 import ProductsLoading from "@/components/shop/ui/ProductSkeleton";
+import ProductCarousel from "./ProductCarousel";
 
 interface ProductsRelatedProps {
   productId: string;
@@ -35,7 +35,10 @@ export default function ProductsRelated({ productId }: ProductsRelatedProps) {
         ) : (
           <div className="w-full px-15 py-[100px]">
             {similarProducts?.length ? (
-              <ProductCarousel productsToBeDisplayed={similarProducts || []} />
+              <ProductCarousel
+                isLoading={isLoading}
+                productsToBeDisplayed={similarProducts || []}
+              />
             ) : (
               <EmptyState message="No similar Products available for this product" />
             )}
