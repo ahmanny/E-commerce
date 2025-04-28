@@ -1,4 +1,3 @@
-import PageTitle from "@/components/AdminPageTitle";
 import SignUpForm from "@/components/auth/SignUpForm";
 
 export default function page() {
