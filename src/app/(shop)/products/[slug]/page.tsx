@@ -74,7 +74,9 @@ export default function page() {
           <ProductGallery images={product.images} />
           <div className=" flex-1 flex flex-col gap-12">
             <ProductInfo
-              productReviews={product.reviews}
+              averageRating={product.averageRating}
+              reviewCount={product.reviewCount}
+              totalSold={product.reviewCount}
               title={product.title}
               image={product.images[0]}
               price={product.price}

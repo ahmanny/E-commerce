@@ -21,18 +21,3 @@ export const generateSKU = (title: string) => {
     const base = title.replace(/\s+/g, '-').toUpperCase().slice(0, 5); // 5-letter base
     return `${base}-${random}`
 }
-
-export const getAverageRating = (reviewData: reviewsInterface[]) => {
-    let totalRatings = 0
-    let ratingSum = 0
-
-    reviewData.forEach((entry) => {
-        const UserReviews = entry.reviews || []
-        totalRatings += UserReviews.length;
-        UserReviews.forEach((review) => {
-            ratingSum += review.rating
-        })
-    });
-    const averageRating = totalRatings > 0 ? ratingSum / totalRatings : 0;
-    return { averageRating, totalReviews: totalRatings }
-}

@@ -30,7 +30,6 @@ export default function ProductReviews({
   if (isLoading) {
     return <LoadingComponent />;
   }
-  // const { averageRating, totalReviews } = getAverageRating(productReviews);
   return (
     <div className="w-[727px]">
       {isError && (
