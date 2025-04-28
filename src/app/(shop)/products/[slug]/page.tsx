@@ -1,19 +1,24 @@
 "use client";
 
-import ProductGallery from "@/components/shopComponents/Product.tsx/ProductGallery";
-import ProductInfo from "@/components/shopComponents/Product.tsx/ProductInfo";
-import ProductOptions from "@/components/shopComponents/Product.tsx/ProductOptions";
-import ProductTabs from "@/components/shopComponents/Product.tsx/ProductTabs";
-import ProductDetails from "@/components/shopComponents/Product.tsx/ProductTabs/ProductDetails";
-import ProductReviews from "@/components/shopComponents/Product.tsx/ProductTabs/ProductReviews";
-import LoadingComponent from "@/app/states/LoadingState";
+import ProductGallery from "@/components/shop/product/ProductGallery";
+import ProductInfo from "@/components/shop/product/ProductInfo";
+import ProductOptions from "@/components/shop/product/ProductOptions";
+import ProductTabs from "@/components/shop/product/ProductTabs";
+import ProductDetails from "@/components/shop/product/ProductTabs/ProductDetails";
+import ProductReviews from "@/components/shop/product/ProductTabs/ProductReviews";
 import { useParams } from "next/navigation";
 import React from "react";
 import { BsThreeDots } from "react-icons/bs";
 import { MdOutlineStarOutline } from "react-icons/md";
 import { useGetProduct } from "@/lib/utils/hooks/queries/products.queries";
+import ProductsRelated from "@/components/shop/product/ProductsRelated";
+import ErrorState from "@/components/states/ErrorState";
+import EmptyState from "@/components/states/EmptyState";
+import LoadingComponent from "@/components/states/LoadingStates/LoadingState";
+import BreadcrumbSub from "@/components/breadcrumbs/BreadcrumbSub";
 
 export default function page() {
+  const siteName = "Ecommerce";
   const params = useParams();
   const { slug } = params as { slug: string };
   const productId = slug.split("-").pop();
@@ -21,11 +26,16 @@ export default function page() {
     data: product,
     isLoading,
     isError,
+    refetch,
   } = useGetProduct(productId as string);
 
   if (isLoading) return <LoadingComponent />;
-  if (isError) return <p>Error loading product</p>;
-  if (!product) return <p>Product not found</p>;
+  if (isError)
+    return <ErrorState message="Error loading product" onRetry={refetch} />;
+  if (!product)
+    return (
+      <EmptyState message={`Product with the ID-${productId} was not found`} />
+    );
   const tabsContent = [
     {
       label: "Details",
@@ -53,29 +63,39 @@ export default function page() {
     },
   ];
   return (
-    <div className="flex flex-col gap-48">
-      <div className="flex h-[580px] gap-28">
-        <ProductGallery images={product.images} />
-        <div className=" flex-1 flex flex-col gap-12">
-          <ProductInfo
-            productReviews={product.reviews}
-            title={product.title}
-            image={product.images[0]}
-            price={product.price}
-            stock_status={product.stock_status}
-          />
-          <ProductOptions
-            available_colors={product.colors}
-            available_sizes={product.sizes}
-            image={product.images[0]}
-            price={product.price}
-            productId={product._id}
-            title={product.title}
-          />
-        </div>
+    <div>
+      <div className="py-5">
+        <BreadcrumbSub
+          breadcrumbItems={[siteName, "products", product.title]}
+        />
       </div>
-      <div>
-        <ProductTabs tabsContent={tabsContent} />
+      <div className="flex flex-col gap-48">
+        <div className="flex h-[580px] gap-28">
+          <ProductGallery images={product.images} />
+          <div className=" flex-1 flex flex-col gap-12">
+            <ProductInfo
+              productReviews={product.reviews}
+              title={product.title}
+              image={product.images[0]}
+              price={product.price}
+              stock_status={product.stock_status}
+            />
+            <ProductOptions
+              available_colors={product.colors}
+              available_sizes={product.sizes}
+              image={product.images[0]}
+              price={product.price}
+              productId={product._id}
+              title={product.title}
+            />
+          </div>
+        </div>
+        <div>
+          <ProductTabs tabsContent={tabsContent} />
+        </div>
+        <div>
+          <ProductsRelated productId={product._id} />
+        </div>
       </div>
     </div>
   );

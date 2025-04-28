@@ -1,7 +1,7 @@
 "use client";
 
-import LoadingComponent from "@/app/states/LoadingState";
-import DataTables from "@/components/tableComponent";
+import LoadingComponent from "@/components/states/LoadingStates/LoadingState";
+import DataTables from "@/components/admin/tableComponent";
 import { useGetAllProducts } from "@/lib/utils/hooks/queries/products.queries";
 
 const tableHeader = ["name", "SKU", "Price", "Stock", "Gender"];

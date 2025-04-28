@@ -15,11 +15,7 @@ export const useCreateOrder = () => {
         },
         // on success clear cart items
         onSuccess: (data) => {
-            console.log("sync successful:", data);
             clearCart();
-        },
-        onError: (error) => {
-            toast.error(error.message);
         }
     })
 }

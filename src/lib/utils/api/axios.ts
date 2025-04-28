@@ -3,7 +3,7 @@ import { destroyCookie, parseCookies, setCookie } from "nookies";
 
 // Create Axios instance
 const API = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/v1",
+    baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
 
 // Request interceptor – attach access token from cookies
@@ -40,17 +40,21 @@ API.interceptors.response.use(
                 }
 
                 const { data } = await axios.post(
-                    `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/v1"}/authentication/refresh`,
+                    `${process.env.NEXT_PUBLIC_API_URL}/authentication/refresh-token`,
                     { refresh_token }
                 );
+                console.log(data);
 
-                const newAccessToken = data.tokens.access_token;
+
+                const newAccessToken = data.data.tokens.access_token;
 
                 // Store new access token in cookies
                 setCookie(null, "access-token", newAccessToken, {
                     path: "/",
-                    maxAge: 60 * 60 * 1, // 1 hour
+                    maxAge: 60 * 60 * 4, // 1 hour
                 });
+
+                setCookie(null, "refresh-token", data.data.tokens.refresh_token, { path: "/", maxAge: 60 * 60 * 24 * 7 });
 
                 // Retry the original request with new token
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;

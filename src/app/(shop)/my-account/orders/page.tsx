@@ -1,13 +1,14 @@
 "use client";
-import { item } from "@/components/shopComponents/profile/ItemCard";
-import UserOrders from "@/components/shopComponents/profile/UserOrders";
-import LoadingComponent from "@/app/states/LoadingState";
+import { item } from "@/components/shop/profile/ItemCard";
+import UserOrders from "@/components/shop/profile/UserOrders";
+import ErrorState from "@/components/states/ErrorState";
+import LoadingComponent from "@/components/states/LoadingStates/LoadingState";
 import { formatDate } from "@/lib/utils/date.utils";
 import { useGetUserOrders } from "@/lib/utils/hooks/queries/orders.queries";
 import { useEffect, useState } from "react";
 
 export default function Page() {
-  const { data, isLoading, isError, error } = useGetUserOrders(); // Assuming you have this hook
+  const { data, isLoading, isError, error, refetch } = useGetUserOrders(); // Assuming you have this hook
   const [items, setItems] = useState<item[]>([]);
 
   useEffect(() => {
@@ -31,11 +32,11 @@ export default function Page() {
   }, [data]);
 
   if (isLoading) return <LoadingComponent />;
-  if (isError) return <div>Error: {error.message}</div>;
+  if (isError) return <ErrorState message={error.message} onRetry={refetch} />;
 
   return (
     <div>
-      {items.length > 0 && <h1 className="text-xl font-semibold">Orders</h1>}
+      {items.length > 0 && <h1 className="heading_2">Orders</h1>}
       {/* Display the orders here */}
       <UserOrders items={items} />
     </div>

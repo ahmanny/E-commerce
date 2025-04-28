@@ -1,7 +1,7 @@
 "use client";
 
 import BreadcrumbMain from "@/components/breadcrumbs/BreadcrumbMain";
-import ProfileNavBar from "@/components/shopComponents/profile/ProfileNavBar";
+import ProfileNavBar from "@/components/shop/profile/ProfileNavBar";
 import { usePathname } from "next/navigation";
 
 export default function MainLayout({

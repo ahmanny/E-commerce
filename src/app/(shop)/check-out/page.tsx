@@ -1,4 +1,4 @@
-import CheckOut from "@/components/shopComponents/checkoutComponents/CheckOut";
+import CheckOut from "@/components/shop/checkout/CheckOut";
 import React from "react";
 
 export default function page() {

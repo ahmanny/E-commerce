@@ -1,10 +1,10 @@
-import ChangePassword from "@/components/shopComponents/profile/ChangePassword";
+import ChangePassword from "@/components/shop/profile/ChangePassword";
 import React from "react";
 
 export default function page() {
   return (
     <div>
-      <h1 className="text-xl font-semibold">Change Password</h1>
+      <h1 className="heading_2">Change Password</h1>
       <ChangePassword />
     </div>
   );

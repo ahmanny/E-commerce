@@ -38,9 +38,6 @@ export const useSignup = () => {
             setUser(data.user)
             setIsLoggedIn(true)
             fetchCategories()
-        },
-        onError: (error) => {
-            console.log("sign up failed:", error);
         }
     })
 }
@@ -89,9 +86,6 @@ export const useLogin = () => {
             if (cartError || wishlistError || categoriesError) {
                 console.log("Failed to login");
             }
-        },
-        onError: (error) => {
-            console.error("Login failed:", error)
         }
     })
 }
@@ -106,9 +100,6 @@ export const useFogottenPassword = () => {
         },
         onSuccess: (data) => {
             console.log(data);
-        },
-        onError: (error) => {
-            console.error("reset password failed:", error);
         }
     })
 }
@@ -123,9 +114,6 @@ export const useResetPassword = () => {
         },
         onSuccess: (data) => {
             console.log(data);
-        },
-        onError: (error) => {
-            console.error("reset password failed:", error);
         }
     })
 }

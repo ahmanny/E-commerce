@@ -9,7 +9,6 @@ export const useGetUserOrders = () =>
         queryKey: ["user-orders"],
         queryFn: async () => {
             const res = await API.get("/order/get-user-orders");
-            console.log(res.data);
             return res.data
         }
     })

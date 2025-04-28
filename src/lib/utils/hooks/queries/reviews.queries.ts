@@ -9,8 +9,6 @@ export const useGetProductReviews = (id: string) =>
         queryKey: ['product-reviews', id],
         queryFn: async () => {
             const res = await API.get<reviewsInterface[]>(`/review/product/${id}`)
-            console.log("reviews:::::", res);
-
             return res.data
         },
         // only run if id exists

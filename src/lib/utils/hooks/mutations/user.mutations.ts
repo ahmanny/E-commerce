@@ -8,9 +8,6 @@ export const useUpdateUser = () => {
         mutationFn: async (credential: any) => {
             const res = await API.patch("/user/update", credential)
             return res.data
-        },
-        onError: (error) => {
-            console.error("reset password failed:", error);
         }
     })
 }

@@ -16,12 +16,8 @@ export const useSyncCartFromBackend = () => {
         },
         // on success save user to zustand and save token to cookie using nookies
         onSuccess: (data) => {
-            console.log("sync successful:", data);
             clearCart();
             queryClient.invalidateQueries({ queryKey: ["user-cart"] })
-        },
-        onError: (error) => {
-            console.log("sync up failed:", error);
         }
     })
 }
@@ -37,11 +33,7 @@ export const useAddCartItem = () => {
         },
         // on success save user to zustand and save token to cookie using nookies
         onSuccess: (data) => {
-            console.log("Cart successfully", data);
             queryClient.invalidateQueries({ queryKey: ["user-cart"] })
-        },
-        onError: (error) => {
-            console.log(" failed:", error);
         }
     })
 }
@@ -57,9 +49,6 @@ export const useDeleteCart = () => {
         // On success, refresh the cache to reflect deletion
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["user-cart"] });
-        },
-        onError: (error) => {
-            console.log("Product deletion failed:", error);
         }
     });
 }

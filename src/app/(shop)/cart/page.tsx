@@ -1,4 +1,4 @@
-import CartContainer from "@/components/shopComponents/cartComponents/CartContainer";
+import CartContainer from "@/components/shop/cart/CartContainer";
 import React from "react";
 
 export default function page() {

@@ -1,4 +1,4 @@
-import CustomersComponents from "@/components/adminComponents/customers/CustomersComponents";
+import CustomersComponents from "@/components/admin/customers/CustomersComponents";
 
 async function fetchData() {
   return new Promise((resolve) => setTimeout(resolve, 3000)); // Simulate 3s delay

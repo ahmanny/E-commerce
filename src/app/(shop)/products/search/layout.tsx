@@ -12,11 +12,11 @@ export default function SearchLayout({
   return (
     <div className="bg-white">
       <div className="py-7 bg-[#F6F6F6] flex flex-col justify-center items-center">
-        <div className="w-[1180px]">
+        <div className="w-full pl-8">
           <BreadcrumbMain />
         </div>
       </div>
-      <div className="  w-[1180px] mx-auto py-2">{children}</div>
+      <div className="  w-full mx-auto py-2">{children}</div>
     </div>
   );
 }

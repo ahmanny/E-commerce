@@ -9,6 +9,7 @@ interface WishlistState {
     setItems: (items: WishlistItem[]) => void;
     addItem: (item: WishlistItem) => void;
     removeItem: (productId: string) => void;
+    clearWishlist: () => void;
 }
 
 export const useWishlistStore = create<WishlistState>()(
@@ -28,6 +29,8 @@ export const useWishlistStore = create<WishlistState>()(
                     items: state.items.filter((item) => item.productId !== productId),
                 }));
             },
+            // set the items to an empty array
+            clearWishlist: () => set({ items: [] }),
         }),
         {
             name: "wishlist-storage", // key name in localStorage

@@ -19,6 +19,19 @@ body {
   .hide-scrollbar {
     scrollbar-width: none;
   }
+  .animate-shimmer {
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
 }
 
 .btn {
@@ -29,4 +42,17 @@ body {
 }
 .label {
   @apply block text-base font-medium;
+}
+
+.heading {
+  @apply text-3xl font-bold text-[#0E1422];
+}
+.heading_2 {
+  @apply text-xl font-semibold;
+}
+.sub_heading {
+  @apply text-lg text-[#5C5F6A];
+}
+.sub_heading_2 {
+  @apply text-lg text-[#0E1422] font-bold;
 }

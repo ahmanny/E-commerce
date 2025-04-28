@@ -15,7 +15,7 @@ export function middleware(req: NextRequest) {
     }
 
     // Profile access
-    if (url.pathname.startsWith("/profile") && !token) {
+    if (url.pathname.startsWith("/my-account") && !token) {
         const callbackUrl = encodeURIComponent(url.pathname);
         return NextResponse.redirect(new URL(`/auth/login?callbackUrl=${callbackUrl}`, req.url));
     }
@@ -38,4 +38,4 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
 }
 
-export const config = { matcher: ["/admin/:path*", "/profile/:path*", "/products/:path", "/auth/reset-password(.*)"] };
+export const config = { matcher: ["/admin/:path*", "/my-account/:path*", "/products/:path", "/auth/reset-password(.*)"] };

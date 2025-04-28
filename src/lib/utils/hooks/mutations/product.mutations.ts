@@ -15,10 +15,7 @@ export const useCreateProduct = () => {
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["products"] });
             fetchCategories()
-        },
-        onError: (error) => {
-            console.log("Product failed to create:", error);
-        },
+        }
     })
 }
 
@@ -31,16 +28,13 @@ export const useUpdateProduct = () => {
     // reset user store after api calls
     return useMutation({
         mutationFn: async ({ id, product }: { id: string; product: any }) => {
-            const res = await API.put(`/products/update/${id}`, product);
+            const res = await API.put(`/products/${id}/update`, product);
             return res.data;
         },
         // on success refresh tanstack query cache 
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["products"] });
             fetchCategories()
-        },
-        onError: (error) => {
-            console.log("product update failed:", error);
         }
     })
 }
@@ -56,9 +50,6 @@ export const useDeleteProduct = () => {
         // On success, refresh the cache to reflect deletion
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["products"] });
-        },
-        onError: (error) => {
-            console.log("Product deletion failed:", error);
         }
     });
 }

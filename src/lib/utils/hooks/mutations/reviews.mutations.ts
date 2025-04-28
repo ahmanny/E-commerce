@@ -16,7 +16,6 @@ export const useAddReview = () => {
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["product-reviews"] });
             queryClient.invalidateQueries({ queryKey: ["product"] });
-            console.log("sync successful:", data);
         },
         onError: (error) => {
             toast.error(error.message);

@@ -17,4 +17,5 @@ export interface reviewsInterface {
     rating: number;
     comment: string;
     isVerifiedBuyer: boolean;
+    createdAt: string;
 }

@@ -1,4 +1,4 @@
-import SettingsComponent from "@/components/adminComponents/settings/SettingsComponent";
+import SettingsComponent from "@/components/admin/settings/SettingsComponent";
 
 export default async function SettingsPage() {
   return (

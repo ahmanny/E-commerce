@@ -21,7 +21,6 @@ export const useFetchUserWishlist = () => {
         queryFn: async () => {
             try {
                 const { data } = await API.get("/wishlist/get");
-                console.log(data);
 
                 // Transform each item into the structure the wishlist store needs
                 const transformedItems: WishlistItem[] = data.wishlist.items.map(

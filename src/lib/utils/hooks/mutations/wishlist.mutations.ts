@@ -22,11 +22,7 @@ export const useWishlistToggle = () => {
         },
         // on success save user to zustand and save token to cookie using nookies
         onSuccess: (data) => {
-            console.log(data);
             fetchUserWishlist()
-        },
-        onError: (error) => {
-            console.error("Toggled failed:", error)
         }
     })
 }
@@ -44,11 +40,7 @@ export const useWishlistDelete = () => {
         },
         // on success save user to zustand and save token to cookie using nookies
         onSuccess: (data) => {
-            console.log(data);
             fetchUserWishlist()
-        },
-        onError: (error) => {
-            console.error("Failed to delete:", error)
         }
     })
 }
