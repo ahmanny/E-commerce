@@ -6,7 +6,6 @@ import { z } from "zod";
 import GoogleSignin from "./GoogleSignin";
 import Link from "next/link";
 import { useLogin } from "@/lib/utils/hooks/mutations/auth.mutations";
-import { Spinner } from "@chakra-ui/react";
 import { BeatLoader } from "react-spinners";
 import { useRouter, useSearchParams } from "next/navigation";
 import TextInput from "../Form/TextInput";

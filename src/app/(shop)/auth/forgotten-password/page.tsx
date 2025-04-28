@@ -1,3 +1,4 @@
+"use client";
 import ForgottenpasswForm from "@/components/auth/ForgottenpasswForm";
 import React from "react";
 

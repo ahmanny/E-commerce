@@ -1,3 +1,4 @@
+"use client";
 import ProductList from "@/components/shop/product/ProductList";
 import React from "react";
 
