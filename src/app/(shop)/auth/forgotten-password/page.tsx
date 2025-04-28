@@ -1,4 +1,3 @@
-import PageTitle from "@/components/AdminPageTitle";
 import ForgottenpasswForm from "@/components/auth/ForgottenpasswForm";
 import React from "react";
 
